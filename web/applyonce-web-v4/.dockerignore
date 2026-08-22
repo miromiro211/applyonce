@@ -1,0 +1,5 @@
+node_modules
+.env
+profile-store.json
+pdf_fill/__pycache__
+.git
