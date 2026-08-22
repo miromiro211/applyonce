@@ -1,0 +1,26 @@
+{
+  "name": "김민서",
+  "email": "minseogim521@gmail.com",
+  "phone": "010-3256-3473",
+  "university": "건국대",
+  "major": "컴퓨터공학과",
+  "grade": "3학년",
+  "python_experience": "있어",
+  "team_project_experience": "있어",
+  "skills": [
+    "python",
+    "c"
+  ],
+  "awards": [
+    "공모전 수상",
+    "서포터즈 활동"
+  ],
+  "portfolio_url": "gitbub.com",
+  "english_score": "토익 700",
+  "custom_fields": [
+    {
+      "label": "자격증",
+      "value": "한능검"
+    }
+  ]
+}

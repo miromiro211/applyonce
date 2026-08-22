@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ApplyOnce</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #172033;
+    --muted: #78849a;
+    --line: #e7edf5;
+    --canvas: #f4f7fb;
+    --white: #ffffff;
+    --blue: #4f7df3;
+    --blue-dark: #3567df;
+    --blue-soft: #eef3ff;
+    --orange: #8ea2c8;
+    --orange-soft: #f5f7fb;
+    --green: #47a67a;
+    --green-soft: #edf8f3;
+    --yellow: #aab7ce;
+    --yellow-soft: #f7f9fc;
+    --danger: #df5b5b;
+    --shadow: 0 12px 30px rgba(34, 53, 84, 0.08);
+  }
+
+  * { box-sizing: border-box; }
+  html { background: var(--canvas); }
+  body {
+    margin: 0;
+    color: var(--ink);
+    background: var(--canvas);
+    font-family: "Inter", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  }
+
+  .shell {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    background: rgba(255,255,255,.96);
+    border-right: 1px solid var(--line);
+    padding: 28px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-weight: 800;
+    font-size: 17px;
+    letter-spacing: -0.02em;
+    margin-bottom: 34px;
+  }
+  .brand-mark {
+    width: 29px;
+    height: 29px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: var(--blue-soft);
+    color: var(--blue);
+    font-size: 15px;
+  }
+  .brand .dot { color: var(--blue); opacity: .55; }
+
+  .nav-step {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 11px 12px;
+    border-radius: 11px;
+    color: #98a4b7;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .nav-step.active { background: var(--blue-soft); color: var(--blue-dark); font-weight: 700; }
+  .nav-step .num {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    background: #f3f6fa;
+    color: #a6b1c0;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .nav-step.active .num { background: var(--blue); color: #fff; }
+
+  .sidebar-foot {
+    margin-top: auto;
+    padding: 14px;
+    border-radius: 13px;
+    background: #f7f9fc;
+    color: #70806d;
+    font-size: 11px;
+    line-height: 1.65;
+  }
+
+  .main { padding: 34px 38px 56px; min-width: 0; }
+  .page-head { margin: 0 0 24px; }
+  .eyebrow { color: var(--blue); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 6px; }
+  .page-head h1 { margin: 0 0 7px; font-size: 25px; letter-spacing: -.03em; }
+  .page-head .sub { color: var(--muted); font-size: 13px; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(320px, 390px) minmax(520px, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 22px;
+    margin-bottom: 18px;
+  }
+  .card h2 {
+    margin: 0 0 17px;
+    color: #59667b;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .035em;
+  }
+  .card h2 .step-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 7px;
+    margin-right: 7px;
+    border-radius: 8px;
+    color: #fff;
+    background: var(--blue);
+  }
+  .card.upload-card h2 .step-chip { background: var(--blue); }
+
+  .field { margin-bottom: 12px; }
+  label { display: block; margin-bottom: 5px; color: var(--muted); font-size: 11.5px; font-weight: 600; }
+  input[type=text], textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fbfdff;
+    color: var(--ink);
+    padding: 10px 11px;
+    font: inherit;
+    font-size: 12.5px;
+    transition: .18s ease;
+  }
+  input[type=text]:focus, textarea:focus {
+    outline: none;
+    border-color: rgba(47,157,244,.65);
+    box-shadow: 0 0 0 3px rgba(47,157,244,.09);
+    background: #fff;
+  }
+  textarea { min-height: 58px; resize: vertical; }
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .custom-field-row { display: flex; gap: 6px; margin-bottom: 6px; }
+  .custom-field-row input { flex: 1; }
+  .custom-field-row input.cf-label { flex: 0.7; }
+  .custom-field-row button.cf-remove {
+    width: auto; flex: 0 0 auto; padding: 0 10px; background: #fdeaea; color: #b23b2e;
+    font-weight: 700; border-radius: 6px;
+  }
+
+  .file-drop {
+    border: 1.5px dashed #cfe1ef;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 11px;
+    background: #fbfdff;
+  }
+  .file-drop:nth-of-type(2) { background: #fbfdff; border-color: #cfe1ef; }
+  .file-label { display: block; color: #617087; font-size: 12px; font-weight: 700; margin-bottom: 8px; }
+  .file-drop input[type=file] { width: 100%; font-size: 11.5px; color: var(--muted); }
+
+  button {
+    border: 0;
+    border-radius: 10px;
+    padding: 11px 16px;
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  button:hover:not(:disabled) { transform: translateY(-1px); }
+  button:disabled { cursor: not-allowed; opacity: .48; transform: none; }
+  button.primary { width: 100%; color: #fff; background: var(--blue); box-shadow: 0 7px 18px rgba(79,125,243,.18); }
+  button.ghost { width: 100%; color: #526176; background: #fff; border: 1px solid var(--line); }
+  button.save { color: #fff; background: var(--blue); }
+  button.edit { color: var(--blue-dark); background: var(--blue-soft); }
+  button.pdf { color: #fff; background: var(--blue); }
+  button.print { color: var(--blue-dark); background: var(--blue-soft); border: 1px solid #dce6ff; }
+  button.original { color: #fff; background: var(--blue); }
+
+  .status { min-height: 16px; margin-top: 9px; color: var(--muted); font-size: 11.5px; }
+
+  .doc-wrap { position: sticky; top: 20px; min-width: 0; }
+  .preview-card { padding: 0; overflow: hidden; }
+  .preview-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--line);
+    background: #fff;
+  }
+  .preview-topbar strong { font-size: 12px; }
+  .edit-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .edit-state i { width: 8px; height: 8px; border-radius: 50%; background: #aab5c4; }
+  .edit-state.editing i { background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+  .edit-state.saved i { background: var(--blue); box-shadow: 0 0 0 4px var(--blue-soft); }
+
+  .doc-paper {
+    width: 100%;
+    min-height: 650px;
+    background: #fff;
+    padding: 46px 48px 54px;
+    overflow-wrap: anywhere;
+  }
+  .doc-empty { padding: 60px 24px; color: #a7b3c2; text-align: center; font-size: 13px; line-height: 1.7; }
+  .doc-empty .empty-icon {
+    width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 16px;
+    background: linear-gradient(135deg, #ecebfb, #f7f6f1); display: flex;
+    align-items: center; justify-content: center; font-size: 24px;
+  }
+  .doc-empty .empty-title { font-size: 14.5px; font-weight: 700; color: #4a5268; margin-bottom: 6px; }
+  .doc-empty .empty-steps {
+    display: inline-flex; flex-direction: column; gap: 6px; margin-top: 14px;
+    text-align: left; font-size: 12px; color: #9aa2b5;
+  }
+  .doc-empty .empty-steps span { display: flex; align-items: center; gap: 8px; }
+  .doc-empty .empty-steps b {
+    width: 18px; height: 18px; border-radius: 50%; background: #ecebfb; color: #4b4bd6;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 10.5px; flex-shrink: 0;
+  }
+
+  .history-card { margin-top: 18px; }
+  .history-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+  .history-empty { font-size: 12px; color: #a7b3c2; padding: 8px 2px; }
+  .history-item {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 9px 11px; border: 1px solid #eee; border-radius: 9px; cursor: pointer; font-size: 12.5px;
+  }
+  .history-item:hover { background: #f7f6f1; }
+  .history-item .hi-title { font-weight: 600; color: #1c2333; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .history-item .hi-date { font-size: 10.5px; color: #a7b3c2; flex-shrink: 0; }
+  .history-item .hi-remove {
+    width: auto; padding: 2px 7px; background: transparent; color: #c2bda9; font-size: 13px;
+    border-radius: 5px; flex-shrink: 0;
+  }
+  .history-item .hi-remove:hover { background: #fdeaea; color: #b23b2e; }
+  .doc-title { margin-bottom: 5px; font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+  .doc-sub { margin-bottom: 29px; color: var(--muted); font-size: 11.5px; }
+  .doc-row { margin-bottom: 21px; break-inside: avoid; }
+  .doc-label { margin-bottom: 6px; color: #718096; font-size: 10.5px; font-weight: 800; letter-spacing: .02em; }
+  .doc-value {
+    min-height: 32px;
+    padding: 7px 9px 8px;
+    border: 1px solid transparent;
+    border-bottom-width: 2px;
+    border-radius: 8px 8px 4px 4px;
+    font-size: 13.5px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    transition: .16s ease;
+  }
+  .doc-value[data-source="profile"] { border-bottom-color: var(--green); background: #fcfff9; }
+  .doc-value[data-source="ai_generated"] { border-bottom-color: var(--blue); background: #fbfdff; }
+  .doc-value[data-source="manual_required"] { border-bottom-color: var(--orange); background: #fffdf9; }
+  .doc-value.editable {
+    border-color: #cfe5f7;
+    background: #fff;
+    box-shadow: inset 0 0 0 1px rgba(47,157,244,.05);
+    outline: none;
+  }
+  .doc-value.editable:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,157,244,.10); }
+  .doc-value.empty:empty::before { content: "직접 입력이 필요합니다"; color: #b5beca; font-style: italic; }
+  .doc-value.editable.empty:empty::before { content: "여기를 클릭해 직접 입력하세요"; color: #9eabb9; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 13px; margin-top: 28px; color: var(--muted); font-size: 10.5px; }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend i { width: 8px; height: 8px; border-radius: 50%; }
+  .legend .profile i { background: var(--green); }
+  .legend .ai_generated i { background: var(--blue); }
+  .legend .manual_required i { background: var(--orange); }
+
+  .doc-actions {
+    display: none;
+    grid-template-columns: repeat(3, minmax(0, auto));
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+  .doc-actions button { width: auto; white-space: nowrap; }
+  .action-note { display: none; margin-top: 8px; color: var(--muted); font-size: 10.5px; }
+  .error { border-radius: 12px; padding: 13px; background: #fff0f0; color: var(--danger); font-size: 12px; }
+
+  @media (max-width: 1100px) {
+    .shell { grid-template-columns: 180px minmax(0,1fr); }
+    .main { padding: 28px 24px; }
+    .layout { grid-template-columns: 1fr; }
+    .doc-wrap { position: static; }
+  }
+  @media (max-width: 720px) {
+    .shell { display: block; }
+    .sidebar { position: static; width: 100%; height: auto; padding: 18px; }
+    .sidebar-foot { display: none; }
+    .nav-step { display: inline-flex; margin-right: 4px; }
+    .main { padding: 20px 14px 36px; }
+    .two-col { grid-template-columns: 1fr; }
+    .doc-paper { padding: 32px 23px; }
+    .doc-actions { grid-template-columns: 1fr; }
+    .doc-actions button { width: 100%; }
+  }
+
+  @page { size: A4; margin: 12mm; }
+  @media print {
+    html, body { width: 100% !important; background: #fff !important; }
+    .shell { display: block !important; width: 100% !important; min-height: 0 !important; }
+    .sidebar, .page-head, .layout > .left-column, .preview-topbar, .doc-actions, .action-note { display: none !important; }
+    .main { display: block !important; width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+    .layout { display: block !important; width: 100% !important; margin: 0 !important; }
+    .doc-wrap, .preview-card { position: static !important; width: 100% !important; max-width: none !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+    .doc-paper { width: 100% !important; max-width: none !important; min-height: 0 !important; margin: 0 !important; padding: 0 !important; border: 0 !important; box-shadow: none !important; overflow: visible !important; }
+    .doc-value { background: #fff !important; box-shadow: none !important; border-left: 0 !important; border-right: 0 !important; border-top: 0 !important; }
+    .doc-row { page-break-inside: avoid; break-inside: avoid; }
+    .legend { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="brand-mark">◎</span> ApplyOnce <span class="dot">•</span></div>
+    <div class="nav-step active"><span class="num">1</span> 프로필</div>
+    <div class="nav-step active"><span class="num">2</span> 문서 업로드</div>
+    <div class="nav-step active"><span class="num">3</span> 결과 확인</div>
+    <div class="sidebar-foot">공고문과 지원서 양식을 올리면<br>프로필을 바탕으로 초안을 만들고,<br>바로 수정·저장·PDF 출력할 수 있어요.</div>
+  </aside>
+
+  <main class="main">
+    <div class="page-head">
+      <div class="eyebrow">Application workspace</div>
+      <h1>지원서 자동 작성</h1>
+      <div class="sub">문서를 생성한 뒤 바로 편집하고 저장할 수 있어요. 저장 후 PDF 저장 또는 인쇄가 가능합니다.</div>
+    </div>
+
+    <div class="layout">
+      <div class="left-column">
+        <div class="card">
+          <h2><span class="step-chip">1</span>내 프로필</h2>
+          <div class="two-col">
+            <div class="field"><label>이름</label><input type="text" id="p_name" /></div>
+            <div class="field"><label>이메일</label><input type="text" id="p_email" /></div>
+            <div class="field"><label>연락처</label><input type="text" id="p_phone" /></div>
+            <div class="field"><label>대학교</label><input type="text" id="p_university" /></div>
+            <div class="field"><label>학과</label><input type="text" id="p_major" /></div>
+            <div class="field"><label>학년/재학상태</label><input type="text" id="p_grade" /></div>
+          </div>
+          <div class="field"><label>Python 활용 경험</label><textarea id="p_python"></textarea></div>
+          <div class="field"><label>팀 프로젝트 협업 경험</label><textarea id="p_team"></textarea></div>
+          <div class="two-col">
+            <div class="field"><label>보유 스킬 (쉼표 구분)</label><input type="text" id="p_skills" /></div>
+            <div class="field"><label>수상/대외활동 (쉼표 구분)</label><input type="text" id="p_awards" /></div>
+          </div>
+          <div class="two-col">
+            <div class="field"><label>포트폴리오 URL</label><input type="text" id="p_portfolio" /></div>
+            <div class="field"><label>어학 점수</label><input type="text" id="p_english" /></div>
+          </div>
+
+          <div class="field" style="margin-top:6px;">
+            <label>추가 입력 사항</label>
+            <div id="customFieldsList"></div>
+            <button class="ghost" id="addCustomFieldBtn" type="button" style="margin-top:4px;">+ 항목 추가</button>
+          </div>
+
+          <button class="ghost" id="saveProfileBtn">프로필 저장</button>
+          <div class="status" id="profileStatus"></div>
+        </div>
+
+        <div class="card upload-card">
+          <h2><span class="step-chip">2</span>문서 업로드</h2>
+          <div class="file-drop">
+            <span class="file-label">공고문 (PDF)</span>
+            <input type="file" id="postingFile" accept=".pdf" />
+          </div>
+          <div class="file-drop">
+            <span class="file-label">지원서 양식 (PDF)</span>
+            <input type="file" id="formFile" accept=".pdf" />
+          </div>
+          <button class="primary" id="generateBtn">문서 자동 생성하기</button>
+          <div class="status" id="genStatus"></div>
+        </div>
+
+        <div class="card history-card">
+          <h2><span class="step-chip">✓</span>생성 이력</h2>
+          <div id="historyList" class="history-list">
+            <div class="history-empty">아직 생성한 지원서가 없습니다</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="doc-wrap">
+        <div class="card preview-card">
+          <div class="preview-topbar">
+            <strong>문서 미리보기</strong>
+            <span class="edit-state" id="editState"><i></i><span>문서 생성 전</span></span>
+          </div>
+          <div class="doc-paper" id="docPaper">
+            <div class="doc-empty">
+              <div class="empty-icon">📄</div>
+              <div class="empty-title">아직 생성된 문서가 없어요</div>
+              프로필을 저장하고 문서 두 개만 올리면<br>초안이 자동으로 완성돼요
+              <div class="empty-steps">
+                <span><b>1</b> 왼쪽에서 프로필 입력 후 저장</span>
+                <span><b>2</b> 공고문 · 지원서 양식 PDF 업로드</span>
+                <span><b>3</b> "문서 자동 생성하기" 클릭</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-actions" id="docActions">
+          <button class="save" id="saveDocumentBtn">저장</button>
+          <button class="edit" id="editDocumentBtn" disabled>편집</button>
+          <button class="pdf" id="exportDocumentBtn" disabled>PDF / 인쇄로 내보내기</button>
+        </div>
+        <div class="action-note" id="actionNote">편집 내용을 저장하면 PDF / 인쇄 내보내기가 활성화됩니다.</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const fieldIds = ["name","email","phone","university","major","grade","python","team","skills","awards","portfolio","english"];
+const profileKeyMap = {
+  name: "name", email: "email", phone: "phone", university: "university",
+  major: "major", grade: "grade", python: "python_experience",
+  team: "team_project_experience", skills: "skills", awards: "awards",
+  portfolio: "portfolio_url", english: "english_score"
+};
+
+let lastFilledFields = null;
+let lastFormFile = null;
+let lastDocTitle = "지원서";
+let lastDocId = null;
+let isEditing = false;
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+let customFields = []; // [{ label: string, value: string }]
+
+function renderCustomFields() {
+  const list = document.getElementById("customFieldsList");
+  list.innerHTML = customFields.map((f, i) => `
+    <div class="custom-field-row" data-idx="${i}">
+      <input type="text" class="cf-label" placeholder="항목명 (예: 자격증)" value="${escapeHtml(f.label)}" />
+      <input type="text" class="cf-value" placeholder="값" value="${escapeHtml(f.value)}" />
+      <button type="button" class="cf-remove">×</button>
+    </div>
+  `).join("");
+
+  list.querySelectorAll(".custom-field-row").forEach((row) => {
+    const idx = Number(row.dataset.idx);
+    row.querySelector(".cf-label").addEventListener("input", (e) => {
+      customFields[idx].label = e.target.value;
+    });
+    row.querySelector(".cf-value").addEventListener("input", (e) => {
+      customFields[idx].value = e.target.value;
+    });
+    row.querySelector(".cf-remove").addEventListener("click", () => {
+      customFields.splice(idx, 1);
+      renderCustomFields();
+    });
+  });
+}
+
+document.getElementById("addCustomFieldBtn").addEventListener("click", () => {
+  customFields.push({ label: "", value: "" });
+  renderCustomFields();
+});
+
+function loadProfile() {
+  const saved = JSON.parse(localStorage.getItem("applyonce_profile") || "{}");
+  fieldIds.forEach(id => {
+    const key = profileKeyMap[id];
+    const el = document.getElementById("p_" + id);
+    if (!el || saved[key] === undefined) return;
+    el.value = Array.isArray(saved[key]) ? saved[key].join(", ") : (saved[key] ?? "");
+  });
+  customFields = Array.isArray(saved.custom_fields) ? saved.custom_fields : [];
+  renderCustomFields();
+}
+
+function collectProfile() {
+  const profile = {};
+  fieldIds.forEach(id => {
+    const key = profileKeyMap[id];
+    const val = document.getElementById("p_" + id).value.trim();
+    if (key === "skills" || key === "awards") {
+      profile[key] = val ? val.split(",").map(s => s.trim()).filter(Boolean) : [];
+    } else {
+      profile[key] = val || null;
+    }
+  });
+  profile.custom_fields = customFields
+    .map(f => ({ label: f.label.trim(), value: f.value.trim() }))
+    .filter(f => f.label || f.value);
+  return profile;
+}
+
+function setEditState(editing) {
+  isEditing = editing;
+  const values = document.querySelectorAll(".doc-value[data-field-index]");
+  values.forEach(el => {
+    el.contentEditable = editing ? "true" : "false";
+    el.classList.toggle("editable", editing);
+  });
+
+  const saveBtn = document.getElementById("saveDocumentBtn");
+  const editBtn = document.getElementById("editDocumentBtn");
+  const exportBtn = document.getElementById("exportDocumentBtn");
+
+  saveBtn.disabled = !editing;
+  editBtn.disabled = editing;
+  exportBtn.disabled = editing;
+
+  const state = document.getElementById("editState");
+  state.classList.toggle("editing", editing);
+  state.classList.toggle("saved", !editing);
+  state.querySelector("span").textContent = editing ? "편집 중" : "저장됨 · 읽기 전용";
+  document.getElementById("actionNote").style.display = editing ? "block" : "none";
+}
+
+function syncDocumentFieldsFromDom() {
+  if (!lastFilledFields) return;
+  document.querySelectorAll(".doc-value[data-field-index]").forEach(el => {
+    const index = Number(el.dataset.fieldIndex);
+    const text = el.innerText.replace(/\u00a0/g, " ").trim();
+    if (!lastFilledFields[index]) return;
+    lastFilledFields[index].value = text || null;
+    if (text) el.classList.remove("empty");
+    else el.classList.add("empty");
+  });
+}
+
+function saveDocumentLocal() {
+  syncDocumentFieldsFromDom();
+  const payload = {
+    id: (lastDocId ||= "doc_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7)),
+    title: lastDocTitle,
+    savedAt: new Date().toISOString(),
+    filled_fields: lastFilledFields
+  };
+  localStorage.setItem("applyonce_last_document", JSON.stringify(payload));
+  upsertHistoryEntry(payload);
+  setEditState(false);
+}
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem("applyonce_history") || "[]");
+  } catch (_) {
+    return [];
+  }
+}
+
+function upsertHistoryEntry(entry) {
+  const history = loadHistory();
+  const idx = history.findIndex(h => h.id === entry.id);
+  if (idx >= 0) history[idx] = entry;
+  else history.unshift(entry);
+  localStorage.setItem("applyonce_history", JSON.stringify(history.slice(0, 30)));
+  renderHistoryList();
+}
+
+function removeHistoryEntry(id) {
+  const history = loadHistory().filter(h => h.id !== id);
+  localStorage.setItem("applyonce_history", JSON.stringify(history));
+  renderHistoryList();
+}
+
+function formatHistoryDate(iso) {
+  const d = new Date(iso);
+  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+}
+
+function renderHistoryList() {
+  const listEl = document.getElementById("historyList");
+  const history = loadHistory();
+  if (history.length === 0) {
+    listEl.innerHTML = `<div class="history-empty">아직 생성한 지원서가 없습니다</div>`;
+    return;
+  }
+  listEl.innerHTML = history.map(h => `
+    <div class="history-item" data-id="${escapeHtml(h.id)}">
+      <span class="hi-title">${escapeHtml(h.title || "지원서")}</span>
+      <span class="hi-date">${formatHistoryDate(h.savedAt)}</span>
+      <button type="button" class="hi-remove" data-remove="${escapeHtml(h.id)}">×</button>
+    </div>
+  `).join("");
+
+  listEl.querySelectorAll(".history-item").forEach(item => {
+    item.addEventListener("click", (e) => {
+      if (e.target.closest("[data-remove]")) return;
+      const entry = loadHistory().find(h => h.id === item.dataset.id);
+      if (!entry) return;
+      lastDocId = entry.id;
+      lastDocTitle = entry.title;
+      lastFilledFields = entry.filled_fields;
+      lastFormFile = null;
+      renderDocument(lastFilledFields, lastDocTitle);
+      setEditState(false);
+    });
+  });
+  listEl.querySelectorAll("[data-remove]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeHistoryEntry(btn.dataset.remove);
+    });
+  });
+}
+
+// 가벼운 캔버스 컨페티 - 외부 라이브러리 없이 문서 생성 완료 시 짧게 재생
+function fireConfetti() {
+  const canvas = document.createElement("canvas");
+  canvas.style.cssText = "position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;";
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext("2d");
+
+  const colors = ["#4b4bd6", "#3f7a5c", "#b8790f", "#e2a33d", "#8890a8"];
+  const pieces = Array.from({ length: 90 }, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * 200,
+    r: 4 + Math.random() * 5,
+    vy: 2 + Math.random() * 3,
+    vx: -1.5 + Math.random() * 3,
+    rot: Math.random() * 360,
+    vr: -6 + Math.random() * 12,
+    color: colors[Math.floor(Math.random() * colors.length)],
+  }));
+
+  let frame = 0;
+  const maxFrames = 130;
+  function tick() {
+    frame++;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.rot += p.vr;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rot * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 0.6);
+      ctx.restore();
+    });
+    if (frame < maxFrames) {
+      requestAnimationFrame(tick);
+    } else {
+      canvas.remove();
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderDocument(filledFields, docTitle) {
+  const paper = document.getElementById("docPaper");
+  const rows = filledFields.map((f, index) => {
+    const hasValue = f.value !== null && f.value !== undefined && String(f.value).trim() !== "";
+    return `
+      <div class="doc-row">
+        <div class="doc-label">${escapeHtml(f.label)}</div>
+        <div class="doc-value ${hasValue ? "" : "empty"}"
+             data-field-index="${index}"
+             data-source="${escapeHtml(f.source || "manual_required")}">${hasValue ? escapeHtml(f.value) : ""}</div>
+      </div>`;
+  }).join("");
+
+  paper.innerHTML = `
+    <div class="doc-title">${escapeHtml(docTitle)}</div>
+    <div class="doc-sub">ApplyOnce가 자동으로 만든 초안입니다. 필요한 부분을 수정한 뒤 저장해주세요.</div>
+    ${rows}
+    <div class="legend">
+      <span class="profile"><i></i> 프로필에서 가져옴</span>
+      <span class="ai_generated"><i></i> AI가 생성함</span>
+      <span class="manual_required"><i></i> 직접 입력 필요</span>
+    </div>
+  `;
+
+  document.getElementById("docActions").style.display = "grid";
+  setEditState(true);
+}
+
+function restoreSavedDocument() {
+  try {
+    const raw = localStorage.getItem("applyonce_last_document");
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (!Array.isArray(saved.filled_fields)) return;
+    lastDocId = saved.id || null;
+    lastDocTitle = saved.title || "저장된 지원서";
+    lastFilledFields = saved.filled_fields;
+    lastFormFile = null;
+    renderDocument(lastFilledFields, lastDocTitle);
+    setEditState(false);
+    document.getElementById("genStatus").textContent = "저장된 문서를 불러왔습니다 ✓";
+  } catch (_) {
+    localStorage.removeItem("applyonce_last_document");
+  }
+}
+
+document.getElementById("saveProfileBtn").addEventListener("click", () => {
+  const profile = collectProfile();
+  localStorage.setItem("applyonce_profile", JSON.stringify(profile));
+  const statusEl = document.getElementById("profileStatus");
+  statusEl.textContent = "저장됨 ✓";
+  setTimeout(() => (statusEl.textContent = ""), 1800);
+
+  // 확장 프로그램이 동기화해갈 수 있도록 서버에도 저장 (실패해도 로컬 저장은 이미 됐으니 무시)
+  fetch("/api/profile", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(profile),
+  }).catch(() => {});
+});
+
+document.getElementById("saveDocumentBtn").addEventListener("click", saveDocumentLocal);
+document.getElementById("editDocumentBtn").addEventListener("click", () => setEditState(true));
+
+// 브라우저의 인쇄 대화상자를 사용해 별도 Python 설치 없이 동작합니다.
+// 여기서 'PDF로 저장'을 선택하면 PDF 파일로 저장할 수 있고, 프린터를 선택하면 바로 인쇄할 수 있습니다.
+document.getElementById("exportDocumentBtn").addEventListener("click", () => {
+  if (isEditing) return;
+  window.print();
+});
+
+document.getElementById("generateBtn").addEventListener("click", async () => {
+  const postingFile = document.getElementById("postingFile").files[0];
+  const formFile = document.getElementById("formFile").files[0];
+  const statusEl = document.getElementById("genStatus");
+  const btn = document.getElementById("generateBtn");
+
+  if (!postingFile || !formFile) {
+    statusEl.textContent = "공고문과 지원서 양식 파일을 둘 다 선택해주세요.";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("postingFile", postingFile);
+  formData.append("formFile", formFile);
+  formData.append("profile", JSON.stringify(collectProfile()));
+
+  btn.disabled = true;
+  statusEl.textContent = "에이전트 실행 중... (수십 초 걸릴 수 있음)";
+
+  try {
+    const res = await fetch("/api/generate", { method: "POST", body: formData });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "알 수 없는 오류");
+
+    statusEl.textContent = "완료 ✓ · 바로 편집할 수 있어요";
+    lastDocTitle = formFile.name.replace(/\.pdf$/i, "") || "지원서";
+    lastDocId = "doc_" + Date.now() + "_" + Math.random().toString(36).slice(2, 7);
+    lastFilledFields = data.filled_fields || [];
+    lastFormFile = formFile;
+    renderDocument(lastFilledFields, lastDocTitle);
+    fireConfetti();
+  } catch (err) {
+    statusEl.textContent = "";
+    document.getElementById("docPaper").innerHTML = `<div class="error">에러: ${escapeHtml(err.message)}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+loadProfile();
+restoreSavedDocument();
+renderHistoryList();
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+# 환경변수 / 민감정보
+.env
+web/.env
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+
+# 서버가 런타임에 생성하는 파일
+web/profile-store.json
+
+# OS
+.DS_Store
+Thumbs.db
